@@ -28,7 +28,6 @@ class Work(LightningWork):
             weight_decay=0.1,
             grad_norm_clip=1.0,
         )
-
         lite = LightningLite(
             accelerator="cuda",
             devices=-1,
@@ -36,7 +35,6 @@ class Work(LightningWork):
             strategy="fsdp-gpt",
             num_nodes=2,  # TODO: Let MultiNode component set this value automatically
         )
-        lite.launch()
         train(lite, model_config, trainer_config)
 
 

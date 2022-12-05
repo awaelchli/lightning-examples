@@ -63,7 +63,6 @@ def main():
         devices=-1,
         precision=16,
         strategy="fsdp-gpt",
-        # num_nodes=2,
     )
     lite.launch()
     train(lite, model_config, trainer_config)
