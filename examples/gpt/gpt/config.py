@@ -16,9 +16,7 @@ class GPTConfig:
 
     def __post_init__(self):
         type_given = self.model_type is not None
-        params_given = all(
-            (self.n_layer is not None, self.n_head is not None, self.n_embd is not None)
-        )
+        params_given = all((self.n_layer is not None, self.n_head is not None, self.n_embd is not None))
         assert type_given ^ params_given
         if type_given:
             # translate from model_type to detailed configuration

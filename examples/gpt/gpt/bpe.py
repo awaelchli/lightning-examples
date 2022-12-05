@@ -1,3 +1,25 @@
+# MIT License
+#
+# Copyright (c) 2020 Andrej Karpathy
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 """
 bpe is short for Byte Pair Encoder. It translates arbitrary utf-8 strings into
 sequences of integers, where each integer represents small chunks of commonly
@@ -14,8 +36,6 @@ import os
 import regex as re
 import requests
 import torch
-
-# -----------------------------------------------------------------------------
 
 
 def bytes_to_unicode():
@@ -34,11 +54,7 @@ def bytes_to_unicode():
     like 'Ā', or 'Ġ', etc.
     """
     # the 188 integers that render fine in their original form and need no shifting
-    bs = (
-        list(range(ord("!"), ord("~") + 1))
-        + list(range(ord("¡"), ord("¬") + 1))
-        + list(range(ord("®"), ord("ÿ") + 1))
-    )
+    bs = list(range(ord("!"), ord("~") + 1)) + list(range(ord("¡"), ord("¬") + 1)) + list(range(ord("®"), ord("ÿ") + 1))
     cs = bs[:]  # all integers b in bs will simply map to chr(b) in the output dict
     # now get the representations of the other 68 integers that do need shifting
     # each will get mapped chr(256 + n), where n will grow from 0...67 in the loop
@@ -95,9 +111,7 @@ class Encoder:
         - we are special casing a few common apostrophe constructs ('s, 't, 're, ...) and making those into separate tokens
         - we then separate out strings into consecutive chunks of 1) letters, 2) numbers, 3) non-letter-numbers, 4) whitespaces
         """
-        self.pat = re.compile(
-            r"""'s|'t|'re|'ve|'m|'ll|'d| ?\p{L}+| ?\p{N}+| ?[^\s\p{L}\p{N}]+|\s+(?!\S)|\s+"""
-        )
+        self.pat = re.compile(r"""'s|'t|'re|'ve|'m|'ll|'d| ?\p{L}+| ?\p{N}+| ?[^\s\p{L}\p{N}]+|\s+(?!\S)|\s+""")
         self.cache = {}
 
     def bpe(self, token):
@@ -243,22 +257,16 @@ def get_encoder():
 
     # load encoder.json that has the raw mappings from token -> bpe index
     encoder_local_file = os.path.join(cache_dir, "encoder.json")
-    encoder_remote_file = (
-        "https://openaipublic.blob.core.windows.net/gpt-2/models/124M/encoder.json"
-    )
+    encoder_remote_file = "https://openaipublic.blob.core.windows.net/gpt-2/models/124M/encoder.json"
     get_file(encoder_local_file, encoder_remote_file)
     with open(encoder_local_file, "r") as f:
         encoder = json.load(f)
-    assert (
-        len(encoder) == 50257
-    )  # 256 individual byte tokens, 50,000 merged tokens, and 1 special <|endoftext|> token
+    assert len(encoder) == 50257  # 256 individual byte tokens, 50,000 merged tokens, and 1 special <|endoftext|> token
 
     # load vocab.bpe that contains the bpe merges, i.e. the bpe tree structure
     # in the form tuples (a, b), that indicate that (a, b) is to be merged to one token ab
     vocab_local_file = os.path.join(cache_dir, "vocab.bpe")
-    vocab_remote_file = (
-        "https://openaipublic.blob.core.windows.net/gpt-2/models/124M/vocab.bpe"
-    )
+    vocab_remote_file = "https://openaipublic.blob.core.windows.net/gpt-2/models/124M/vocab.bpe"
     get_file(vocab_local_file, vocab_remote_file)
     with open(vocab_local_file, "r", encoding="utf-8") as f:
         bpe_data = f.read()
@@ -269,9 +277,6 @@ def get_encoder():
     # construct the Encoder object and return
     enc = Encoder(encoder, bpe_merges)
     return enc
-
-
-# -----------------------------------------------------------------------------
 
 
 class BPETokenizer:
@@ -297,43 +302,3 @@ class BPETokenizer:
         # decode indices to text
         text = self.encoder.decode(idx.tolist())
         return text
-
-
-if __name__ == "__main__":
-
-    # here is an encoding example
-    text = "Hello!! I'm Andrej Karpathy. It's 2022. w00t :D 🤗"
-    e = get_encoder()
-    r = e.encode_and_show_work(text)
-
-    print("Original text is:")
-    print(text)
-    print("First the text gets pre-tokenized, broken up into chunks, the outcome is:")
-    print(r["tokens"])
-    # ['Hello', '!!', ' I', "'m", ' Andrej', ' Karpathy', '.', ' It', "'s", ' 2022', '.', ' w', '00', 't', ' :', 'D', ' 🤗']
-    print("Then we iterate over each chunk and process them in turn...")
-    for part in r["parts"]:
-        print(part)
-    # {'token': 'Hello', 'token_bytes': b'Hello', 'token_translated': 'Hello', 'token_merged': ['Hello'], 'token_ix': [15496]}
-    # {'token': '!!', 'token_bytes': b'!!', 'token_translated': '!!', 'token_merged': ['!!'], 'token_ix': [3228]}
-    # {'token': ' I', 'token_bytes': b' I', 'token_translated': 'ĠI', 'token_merged': ['ĠI'], 'token_ix': [314]}
-    # {'token': "'m", 'token_bytes': b"'m", 'token_translated': "'m", 'token_merged': ["'m"], 'token_ix': [1101]}
-    # {'token': ' Andrej', 'token_bytes': b' Andrej', 'token_translated': 'ĠAndrej', 'token_merged': ['ĠAndre', 'j'], 'token_ix': [10948, 73]}
-    # {'token': ' Karpathy', 'token_bytes': b' Karpathy', 'token_translated': 'ĠKarpathy', 'token_merged': ['ĠK', 'arp', 'athy'], 'token_ix': [509, 5117, 10036]}
-    # {'token': '.', 'token_bytes': b'.', 'token_translated': '.', 'token_merged': ['.'], 'token_ix': [13]}
-    # {'token': ' It', 'token_bytes': b' It', 'token_translated': 'ĠIt', 'token_merged': ['ĠIt'], 'token_ix': [632]}
-    # {'token': "'s", 'token_bytes': b"'s", 'token_translated': "'s", 'token_merged': ["'s"], 'token_ix': [338]}
-    # {'token': ' 2022', 'token_bytes': b' 2022', 'token_translated': 'Ġ2022', 'token_merged': ['Ġ2022'], 'token_ix': [33160]}
-    # {'token': '.', 'token_bytes': b'.', 'token_translated': '.', 'token_merged': ['.'], 'token_ix': [13]}
-    # {'token': ' w', 'token_bytes': b' w', 'token_translated': 'Ġw', 'token_merged': ['Ġw'], 'token_ix': [266]}
-    # {'token': '00', 'token_bytes': b'00', 'token_translated': '00', 'token_merged': ['00'], 'token_ix': [405]}
-    # {'token': 't', 'token_bytes': b't', 'token_translated': 't', 'token_merged': ['t'], 'token_ix': [83]}
-    # {'token': ' :', 'token_bytes': b' :', 'token_translated': 'Ġ:', 'token_merged': ['Ġ:'], 'token_ix': [1058]}
-    # {'token': 'D', 'token_bytes': b'D', 'token_translated': 'D', 'token_merged': ['D'], 'token_ix': [35]}
-    # {'token': ' 🤗', 'token_bytes': b' \xf0\x9f\xa4\x97', 'token_translated': 'ĠðŁ¤Ĺ', 'token_merged': ['ĠðŁ', '¤', 'Ĺ'], 'token_ix': [12520, 97, 245]}
-    # (refer to the code inside Encoder.encode for what these intermediates are)
-    print("and the final outcome is concatenating and flattening all the token_ix:")
-    print(r["bpe_idx"])
-    # [15496, 3228, 314, 1101, 10948, 73, 509, 5117, 10036, 13, 632, 338, 33160, 13, 266, 405, 83, 1058, 35, 12520, 97, 245]
-    # this would then become the integer input sequence to the transformer
-    print("ready to feed into a Transformer!")
