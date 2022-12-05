@@ -1,2 +1,3 @@
-# lightning-examples
-PyTorch examples powered by Lightning
+# Lightning Examples
+
+PyTorch examples powered by Lightning.
