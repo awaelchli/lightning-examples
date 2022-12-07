@@ -115,7 +115,7 @@ def train(lite, model_config, trainer_config):
             torch.nn.utils.clip_grad_norm_(model.parameters(), trainer_config.grad_norm_clip)
             optimizer.step()
 
-        lite.print(flops.flop_counts)
+        # lite.print(flops.flop_counts)
 
         if iteration % 10 == 0:
             lite.print(f"iteration time {iter_dt * 1000:.2f}ms; iteration {iteration}; train loss {loss.item():.5f}")

@@ -134,7 +134,7 @@ class FlopCounterMode(TorchDispatchMode):
         self.flop_counts = defaultdict(lambda: defaultdict(int))
         self.parents = ['Global']
         if module is not None:
-            for name, module in dict(mod.named_children()).items():
+            for name, module in dict(module.named_children()).items():
                 module.register_forward_pre_hook(self.enter_module(name))
                 module.register_forward_hook(self.exit_module(name))
 
