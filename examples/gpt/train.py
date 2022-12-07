@@ -15,8 +15,7 @@ from lightning_lite.strategies.fsdp import FSDPStrategy
 from torch.distributed.fsdp import BackwardPrefetch
 from torch.distributed.fsdp.wrap import transformer_auto_wrap_policy
 from torch.utils.data.dataloader import DataLoader
-from tools import FlopCounter
-from tools.stats import gpu_utilization
+from tools import FlopCounter, gpu_utilization
 
 
 auto_wrap_policy = functools.partial(transformer_auto_wrap_policy, transformer_layer_cls={Block})
