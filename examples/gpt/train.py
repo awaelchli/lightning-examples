@@ -15,7 +15,8 @@ from lightning_lite.strategies.fsdp import FSDPStrategy
 from torch.distributed.fsdp import BackwardPrefetch
 from torch.distributed.fsdp.wrap import transformer_auto_wrap_policy
 from torch.utils.data.dataloader import DataLoader
-from tools import FlopCounter
+from tools import FlopCounter, gpu_utilization
+
 
 auto_wrap_policy = functools.partial(transformer_auto_wrap_policy, transformer_layer_cls={Block})
 STRATEGY_REGISTRY.register(
@@ -98,6 +99,7 @@ def train(lite, model_config, trainer_config):
     data_iter = iter(train_loader)
     flops = 0
     total_iter_dt = 0
+    gpu_util = []
 
     while True:
         try:
@@ -118,13 +120,17 @@ def train(lite, model_config, trainer_config):
         flops += flop_counter.total()
         iter_dt = flop_counter.time()
         total_iter_dt += iter_dt
+        gpu_util.append(gpu_utilization(lite.device))
 
         iteration += 1
 
         if iteration % 10 == 0:
             avg_tflops = flops / 1e12 / total_iter_dt
+            avg_gpu_util = torch.stack(lite.all_gather(gpu_util)).float().mean(0).cpu().floor().tolist()
+            gpu_util = []
             lite.print(
-                f"iteration time {iter_dt * 1e3:.2f}ms; iteration {iteration}; train loss {loss.item():.5f}; TFLOP/s: {avg_tflops:.2f}"
+                f"iteration time {iter_dt * 1e3:.2f}ms; iteration {iteration}; train loss {loss.item():.5f};\n"
+                f"TFLOP/s {avg_tflops:.2f}; GPUs % {avg_gpu_util}"
             )
 
         if trainer_config.max_iters != -1 and iteration >= trainer_config.max_iters:
