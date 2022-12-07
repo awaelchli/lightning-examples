@@ -1,2 +1,2 @@
-torch>=1.13.0
+torch>=1.14.0.dev20221206
 https://github.com/Lightning-AI/lightning/archive/refs/heads/master.zip

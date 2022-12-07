@@ -1,5 +1,6 @@
 # Adapted from https://gist.github.com/soumith/5f81c3d40d41bb9d08041431c656b233
 # Original author: Soumith Chintala
+from time import perf_counter
 
 import torch
 from torch.utils._pytree import tree_map
@@ -142,6 +143,8 @@ def normalize_tuple(x):
 class FlopCounterMode(TorchDispatchMode):
     def __init__(self, module=None):
         self.flop_counts = defaultdict(lambda: defaultdict(int))
+        self.t_start = 0
+        self.t_end = 0
         self.parents = ["Global"]
         if module is not None:
             for name, module in dict(module.named_children()).items():
@@ -199,22 +202,22 @@ class FlopCounterMode(TorchDispatchMode):
 
         return PopState.apply
 
+    def total(self) -> int:
+        mac_count = sum(self.flop_counts["Global"].values())
+        return 2 * mac_count  # flops = 2 * macs approximately
+
+    def time(self) -> float:
+        return self.t_end - self.t_start
+
     def __enter__(self):
         self.flop_counts.clear()
+        self.t_start = perf_counter()
+        self.t_end = 0
         super().__enter__()
 
-    def __exit__(self, *args):
-        gmacs = round(sum(self.flop_counts["Global"].values()) / 1e9, 2)
-        gflops = 2 * gmacs  # flops = 2 * macs approximately
-        print(f"Total: {gflops} GFlops")
-        for mod in self.flop_counts.keys():
-            print(f"Module: ", mod)
-            for k, v in self.flop_counts[mod].items():
-                mod_gmacs = round(v / 1e9, 2)
-                mod_gflops = mod_gmacs * 2
-                print(f"{k}: {mod_gflops} GFLOPS")
-            print()
-        super().__exit__(*args)
+    def __exit__(self):
+        self.t_end = perf_counter()
+        super().__exit__()
 
     def __torch_dispatch__(self, func, types, args=(), kwargs=None):
         kwargs = kwargs if kwargs else {}

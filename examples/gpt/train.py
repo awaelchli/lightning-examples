@@ -95,9 +95,9 @@ def train(lite, model_config, trainer_config):
 
     model.train()
     iteration = 0
-    iter_dt = 0
-    iter_time = time.time()
     data_iter = iter(train_loader)
+    flops = 0
+    total_iter_dt = 0
 
     while True:
         try:
@@ -108,22 +108,23 @@ def train(lite, model_config, trainer_config):
 
         x, y = batch
 
-        with FlopCounterMode(model) as flops:
+        with FlopCounterMode(model) as flop_counter:
             _, loss = model(x, y)
             model.zero_grad(set_to_none=True)
             lite.backward(loss)
             torch.nn.utils.clip_grad_norm_(model.parameters(), trainer_config.grad_norm_clip)
             optimizer.step()
 
-        # lite.print(flops.flop_counts)
-
-        if iteration % 10 == 0:
-            lite.print(f"iteration time {iter_dt * 1000:.2f}ms; iteration {iteration}; train loss {loss.item():.5f}")
+            flops += flop_counter.total()
+            iter_dt = flop_counter.time()
+            total_iter_dt += iter_dt
 
         iteration += 1
-        tnow = time.time()
-        iter_dt = tnow - iter_time
-        iter_time = tnow
+
+        if iteration % 10 == 0:
+            lite.print('gflop', flops / iteration / 1e9)
+            avg_gflops = flops / iteration / 1e9 / total_iter_dt
+            lite.print(f"iteration time {iter_dt * 1000:.2f}ms; iteration {iteration}; train loss {loss.item():.5f}; GFLOP/S: {avg_gflops:.2f}")
 
         if trainer_config.max_iters != -1 and iteration >= trainer_config.max_iters:
             break
