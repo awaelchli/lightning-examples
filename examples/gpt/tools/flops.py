@@ -140,7 +140,7 @@ def normalize_tuple(x):
     return x
 
 
-class FlopCounterMode(TorchDispatchMode):
+class FlopCounter(TorchDispatchMode):
     def __init__(self, module=None):
         self.flop_counts = defaultdict(lambda: defaultdict(int))
         self.t_start = 0

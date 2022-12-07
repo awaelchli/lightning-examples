@@ -15,7 +15,7 @@ from lightning_lite.strategies.fsdp import FSDPStrategy
 from torch.distributed.fsdp import BackwardPrefetch
 from torch.distributed.fsdp.wrap import transformer_auto_wrap_policy
 from torch.utils.data.dataloader import DataLoader
-from tools import FlopCounterMode
+from tools import FlopCounter
 
 auto_wrap_policy = functools.partial(transformer_auto_wrap_policy, transformer_layer_cls={Block})
 STRATEGY_REGISTRY.register(
@@ -108,7 +108,7 @@ def train(lite, model_config, trainer_config):
 
         x, y = batch
 
-        with FlopCounterMode(model) as flop_counter:
+        with FlopCounter(model) as flop_counter:
             _, loss = model(x, y)
             model.zero_grad(set_to_none=True)
             lite.backward(loss)

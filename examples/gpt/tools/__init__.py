@@ -1,1 +1,1 @@
-from tools.flops import FlopCounterMode
+from tools.flops import FlopCounter
