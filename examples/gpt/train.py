@@ -15,6 +15,7 @@ from lightning_lite.strategies.fsdp import FSDPStrategy
 from torch.distributed.fsdp import BackwardPrefetch
 from torch.distributed.fsdp.wrap import transformer_auto_wrap_policy
 from torch.utils.data.dataloader import DataLoader
+from tools import FlopCounter
 
 auto_wrap_policy = functools.partial(transformer_auto_wrap_policy, transformer_layer_cls={Block})
 STRATEGY_REGISTRY.register(
@@ -94,9 +95,9 @@ def train(lite, model_config, trainer_config):
 
     model.train()
     iteration = 0
-    iter_dt = 0
-    iter_time = time.time()
     data_iter = iter(train_loader)
+    flops = 0
+    total_iter_dt = 0
 
     while True:
         try:
@@ -107,19 +108,24 @@ def train(lite, model_config, trainer_config):
 
         x, y = batch
 
-        _, loss = model(x, y)
-        model.zero_grad(set_to_none=True)
-        lite.backward(loss)
-        torch.nn.utils.clip_grad_norm_(model.parameters(), trainer_config.grad_norm_clip)
-        optimizer.step()
+        with FlopCounter(model) as flop_counter:
+            _, loss = model(x, y)
+            model.zero_grad(set_to_none=True)
+            lite.backward(loss)
+            torch.nn.utils.clip_grad_norm_(model.parameters(), trainer_config.grad_norm_clip)
+            optimizer.step()
 
-        if iteration % 10 == 0:
-            lite.print(f"iteration time {iter_dt * 1000:.2f}ms; iteration {iteration}; train loss {loss.item():.5f}")
+        flops += flop_counter.total()
+        iter_dt = flop_counter.time()
+        total_iter_dt += iter_dt
 
         iteration += 1
-        tnow = time.time()
-        iter_dt = tnow - iter_time
-        iter_time = tnow
+
+        if iteration % 10 == 0:
+            avg_tflops = flops / 1e12 / total_iter_dt
+            lite.print(
+                f"iteration time {iter_dt * 1e3:.2f}ms; iteration {iteration}; train loss {loss.item():.5f}; TFLOP/s: {avg_tflops:.2f}"
+            )
 
         if trainer_config.max_iters != -1 and iteration >= trainer_config.max_iters:
             break
