@@ -15,6 +15,7 @@ from lightning_lite.strategies.fsdp import FSDPStrategy
 from torch.distributed.fsdp import BackwardPrefetch
 from torch.distributed.fsdp.wrap import transformer_auto_wrap_policy
 from torch.utils.data.dataloader import DataLoader
+from tools import FlopCounterMode
 
 auto_wrap_policy = functools.partial(transformer_auto_wrap_policy, transformer_layer_cls={Block})
 STRATEGY_REGISTRY.register(
@@ -107,11 +108,14 @@ def train(lite, model_config, trainer_config):
 
         x, y = batch
 
-        _, loss = model(x, y)
-        model.zero_grad(set_to_none=True)
-        lite.backward(loss)
-        torch.nn.utils.clip_grad_norm_(model.parameters(), trainer_config.grad_norm_clip)
-        optimizer.step()
+        with FlopCounterMode(model) as flops:
+            _, loss = model(x, y)
+            model.zero_grad(set_to_none=True)
+            lite.backward(loss)
+            torch.nn.utils.clip_grad_norm_(model.parameters(), trainer_config.grad_norm_clip)
+            optimizer.step()
+
+        lite.print(flops.flop_counts)
 
         if iteration % 10 == 0:
             lite.print(f"iteration time {iter_dt * 1000:.2f}ms; iteration {iteration}; train loss {loss.item():.5f}")
