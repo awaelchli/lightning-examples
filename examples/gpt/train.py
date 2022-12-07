@@ -12,27 +12,17 @@ from lightning_lite import seed_everything
 from lightning_lite.lite import LightningLite
 from lightning_lite.strategies import STRATEGY_REGISTRY
 from lightning_lite.strategies.fsdp import FSDPStrategy
-from torch.distributed.algorithms._checkpoint.checkpoint_wrapper import (
-    apply_activation_checkpointing,
-    checkpoint_wrapper,
-    CheckpointImpl,
-)
-from torch.distributed.fsdp import BackwardPrefetch, CPUOffload
+from torch.distributed.fsdp import BackwardPrefetch
 from torch.distributed.fsdp.wrap import transformer_auto_wrap_policy
 from torch.utils.data.dataloader import DataLoader
 
 auto_wrap_policy = functools.partial(transformer_auto_wrap_policy, transformer_layer_cls={Block})
-check_fn = lambda submodule: isinstance(submodule, Block)
-wrapper = functools.partial(
-    checkpoint_wrapper,
-    offload_to_cpu=False,
-    checkpoint_impl=CheckpointImpl.NO_REENTRANT,
-)
 STRATEGY_REGISTRY.register(
     name="fsdp-gpt",
     strategy=FSDPStrategy,
     description="FSDP strategy with memory optimizations enabled for GPT large scale pretraining.",
     auto_wrap_policy=auto_wrap_policy,
+    activation_checkpointing=[Block],
     backward_prefetch=BackwardPrefetch.BACKWARD_PRE,
 )
 
@@ -85,8 +75,6 @@ def train(lite, model_config, trainer_config):
 
     lite.print(f"Number of parameters per device: {model.num_parameters / 1e6:.1f} M")
     lite.print(f"Total number of parameters: ~ {lite.world_size * model.num_parameters / 1e6:.1f} M")
-
-    apply_activation_checkpointing(model, checkpoint_wrapper_fn=wrapper, check_fn=check_fn)
 
     # TODO: support multiple param groups for FSDP
     # optimizer = model.configure_optimizers(config.trainer)
