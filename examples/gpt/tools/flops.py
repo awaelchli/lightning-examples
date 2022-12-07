@@ -213,7 +213,7 @@ class FlopCounterMode(TorchDispatchMode):
         self.flop_counts.clear()
         self.t_start = perf_counter()
         self.t_end = 0
-        super().__enter__()
+        return super().__enter__()
 
     def __exit__(self, *args, **kwargs):
         self.t_end = perf_counter()
