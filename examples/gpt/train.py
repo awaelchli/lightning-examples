@@ -100,6 +100,7 @@ def train(lite, model_config, trainer_config):
     data_iter = iter(train_loader)
     flops = 0
     total_iter_dt = 0
+    gpu_util = []
 
     while True:
         try:
@@ -120,13 +121,16 @@ def train(lite, model_config, trainer_config):
         flops += flop_counter.total()
         iter_dt = flop_counter.time()
         total_iter_dt += iter_dt
+        gpu_util.append(gpu_utilization(lite.device))
 
         iteration += 1
 
-        print(lite.global_rank, gpu_utilization(lite.device))
+        print(lite.global_rank,)
 
         if iteration % 10 == 0:
             avg_tflops = flops / 1e12 / total_iter_dt
+            alll = lite.all_gather(gpu_util)
+            print(alll)
             report = (
                 f"iteration time {iter_dt * 1e3:.2f}ms; iteration {iteration}; train loss {loss.item():.5f}; TFLOP/s {avg_tflops:.2f}"
             )
