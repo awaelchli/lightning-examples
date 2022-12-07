@@ -1,5 +1,7 @@
 # Adapted from https://gist.github.com/soumith/5f81c3d40d41bb9d08041431c656b233
-# Original author: Soumith Chintala
+# See also: https://dev-discuss.pytorch.org/t/the-ideal-pytorch-flop-counter-with-torch-dispatch/505
+# Original authors: Horace He, Soumith Chintala
+
 from time import perf_counter
 
 import torch
