@@ -1,8 +1,7 @@
-# Copied from https://gist.github.com/soumith/5f81c3d40d41bb9d08041431c656b233
-# Author: Soumith Chintala
+# Adapted from https://gist.github.com/soumith/5f81c3d40d41bb9d08041431c656b233
+# Original author: Soumith Chintala
 
 import torch
-import torch.nn as nn
 from torch.utils._pytree import tree_map
 from typing import List, Any
 from numbers import Number
@@ -11,14 +10,17 @@ from torch.utils._python_dispatch import TorchDispatchMode
 
 aten = torch.ops.aten
 
+
 def get_shape(i):
     return i.shape
+
 
 def prod(x):
     res = 1
     for i in x:
         res *= i
     return res
+
 
 def matmul_flop(inputs: List[Any], outputs: List[Any]) -> Number:
     """
@@ -31,6 +33,7 @@ def matmul_flop(inputs: List[Any], outputs: List[Any]) -> Number:
     assert input_shapes[0][-1] == input_shapes[1][-2], input_shapes
     flop = prod(input_shapes[0]) * input_shapes[-1][-1]
     return flop
+
 
 def addmm_flop(inputs: List[Any], outputs: List[Any]) -> Number:
     """
@@ -48,6 +51,7 @@ def addmm_flop(inputs: List[Any], outputs: List[Any]) -> Number:
     flops = batch_size * input_dim * output_dim
     return flops
 
+
 def bmm_flop(inputs: List[Any], outputs: List[Any]) -> Number:
     """
     Count flops for the bmm operation.
@@ -60,6 +64,7 @@ def bmm_flop(inputs: List[Any], outputs: List[Any]) -> Number:
     d = input_shapes[-1][-1]
     flop = n * c * t * d
     return flop
+
 
 def conv_flop_count(
     x_shape: List[int],
@@ -85,6 +90,7 @@ def conv_flop_count(
     flop = batch_size * prod(w_shape) * prod(conv_shape)
     return flop
 
+
 def conv_flop(inputs: List[Any], outputs: List[Any]):
     """
     Count flops for convolution.
@@ -95,8 +101,10 @@ def conv_flop(inputs: List[Any], outputs: List[Any]):
 
     return conv_flop_count(x_shape, w_shape, out_shape, transposed=transposed)
 
+
 def transpose_shape(shape):
     return [shape[1], shape[0]] + list(shape[2:])
+
 
 def conv_backward_flop(inputs: List[Any], outputs: List[Any]):
     grad_out_shape, x_shape, w_shape = [get_shape(i) for i in inputs[:3]]
@@ -124,15 +132,17 @@ flop_mapping = {
     aten.convolution_backward: conv_backward_flop,
 }
 
+
 def normalize_tuple(x):
     if not isinstance(x, tuple):
         return (x,)
     return x
 
+
 class FlopCounterMode(TorchDispatchMode):
-    def __init__(self, module = None):
+    def __init__(self, module=None):
         self.flop_counts = defaultdict(lambda: defaultdict(int))
-        self.parents = ['Global']
+        self.parents = ["Global"]
         if module is not None:
             for name, module in dict(module.named_children()).items():
                 module.register_forward_pre_hook(self.enter_module(name))
@@ -149,10 +159,11 @@ class FlopCounterMode(TorchDispatchMode):
 
     def exit_module(self, name):
         def f(module, inputs, outputs):
-            assert(self.parents[-1] == name)
+            assert self.parents[-1] == name
             self.parents.pop()
             outputs = normalize_tuple(outputs)
             return self.create_backwards_push(name)(*outputs)
+
         return f
 
     def create_backwards_push(self, name):
@@ -182,25 +193,24 @@ class FlopCounterMode(TorchDispatchMode):
 
             @staticmethod
             def backward(ctx, *grad_outs):
-                assert(self.parents[-1] == name)
+                assert self.parents[-1] == name
                 self.parents.pop()
                 return grad_outs
 
         return PopState.apply
-
 
     def __enter__(self):
         self.flop_counts.clear()
         super().__enter__()
 
     def __exit__(self, *args):
-        gmacs = round(sum(self.flop_counts['Global'].values())/1e9, 2)
-        gflops = 2 * gmacs # flops = 2 * macs approximately
+        gmacs = round(sum(self.flop_counts["Global"].values()) / 1e9, 2)
+        gflops = 2 * gmacs  # flops = 2 * macs approximately
         print(f"Total: {gflops} GFlops")
         for mod in self.flop_counts.keys():
             print(f"Module: ", mod)
-            for k,v in self.flop_counts[mod].items():
-                mod_gmacs = round(v/1e9, 2)
+            for k, v in self.flop_counts[mod].items():
+                mod_gmacs = round(v / 1e9, 2)
                 mod_gflops = mod_gmacs * 2
                 print(f"{k}: {mod_gflops} GFLOPS")
             print()
