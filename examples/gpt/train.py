@@ -122,8 +122,10 @@ def train(lite, model_config, trainer_config):
         iteration += 1
 
         if iteration % 10 == 0:
-            avg_gflops = flops / 1e9 / total_iter_dt
-            lite.print(f"iteration time {iter_dt * 1e3:.2f}ms; iteration {iteration}; train loss {loss.item():.5f}; GFLOP/s: {avg_gflops:.2f}")
+            avg_tflops = flops / 1e12 / total_iter_dt
+            lite.print(
+                f"iteration time {iter_dt * 1e3:.2f}ms; iteration {iteration}; train loss {loss.item():.5f}; TFLOP/s: {avg_tflops:.2f}"
+            )
 
         if trainer_config.max_iters != -1 and iteration >= trainer_config.max_iters:
             break
