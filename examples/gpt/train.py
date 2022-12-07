@@ -107,8 +107,9 @@ def train(lite, model_config, trainer_config):
             batch = next(data_iter)
 
         x, y = batch
-
-        with FlopCounterMode(model) as flop_counter:
+        
+        flop_counter = FlopCounterMode(model)
+        with flop_counter:
             _, loss = model(x, y)
             model.zero_grad(set_to_none=True)
             lite.backward(loss)
