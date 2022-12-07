@@ -120,7 +120,7 @@ def train(lite, model_config, trainer_config):
             total_iter_dt += iter_dt
 
         iteration += 1
-
+        # Total: 97930.36 GFlops
         if iteration % 10 == 0:
             lite.print('gflop', flops / iteration / 1e9)
             avg_gflops = flops / iteration / 1e9 / total_iter_dt

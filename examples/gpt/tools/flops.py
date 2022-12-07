@@ -215,9 +215,9 @@ class FlopCounterMode(TorchDispatchMode):
         self.t_end = 0
         super().__enter__()
 
-    def __exit__(self):
+    def __exit__(self, *args, **kwargs):
         self.t_end = perf_counter()
-        super().__exit__()
+        super().__exit__(*args, **kwargs)
 
     def __torch_dispatch__(self, func, types, args=(), kwargs=None):
         kwargs = kwargs if kwargs else {}
