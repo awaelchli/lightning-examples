@@ -4,6 +4,4 @@ __pycache__/
 .env
 .pylintrc
 *.egg-info
-
-
 .lightning
