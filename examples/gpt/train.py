@@ -127,7 +127,7 @@ def train(lite, model_config, trainer_config):
 
         if iteration % 10 == 0:
             avg_tflops = flops / 1e12 / total_iter_dt
-            avg_gpu_util = torch.stack(lite.all_gather(gpu_util)).float()  # .mean(1).cpu().floor().tolist()
+            avg_gpu_util = torch.stack(lite.all_gather(gpu_util)).float().mean(0).cpu().floor().tolist()
             gpu_util = []
             lite.print(avg_gpu_util)
             report = (
