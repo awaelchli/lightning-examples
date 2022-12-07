@@ -16,6 +16,8 @@ from torch.distributed.fsdp import BackwardPrefetch
 from torch.distributed.fsdp.wrap import transformer_auto_wrap_policy
 from torch.utils.data.dataloader import DataLoader
 from tools import FlopCounter
+from tools.stats import gpu_utilization
+
 
 auto_wrap_policy = functools.partial(transformer_auto_wrap_policy, transformer_layer_cls={Block})
 STRATEGY_REGISTRY.register(
@@ -121,11 +123,14 @@ def train(lite, model_config, trainer_config):
 
         iteration += 1
 
+        print(lite.global_rank, gpu_utilization(lite.device))
+
         if iteration % 10 == 0:
             avg_tflops = flops / 1e12 / total_iter_dt
-            lite.print(
-                f"iteration time {iter_dt * 1e3:.2f}ms; iteration {iteration}; train loss {loss.item():.5f}; TFLOP/s: {avg_tflops:.2f}"
+            report = (
+                f"iteration time {iter_dt * 1e3:.2f}ms; iteration {iteration}; train loss {loss.item():.5f}; TFLOP/s {avg_tflops:.2f}"
             )
+            lite.print(report)
 
         if trainer_config.max_iters != -1 and iteration >= trainer_config.max_iters:
             break
