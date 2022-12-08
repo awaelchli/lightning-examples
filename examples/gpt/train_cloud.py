@@ -1,3 +1,4 @@
+# ! pip install --upgrade --pre torch --extra-index-url https://download.pytorch.org/whl/nightly/cu117
 # ! PACKAGE_NAME=lite pip install git+https://github.com/Lightning-AI/lightning
 # ! cd data && bash download-data.sh
 
