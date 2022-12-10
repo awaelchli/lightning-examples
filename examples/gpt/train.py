@@ -30,7 +30,7 @@ STRATEGY_REGISTRY.register(
 
 def main():
     model_config = GPTConfig(
-        model_type="gpt2-xxxl",
+        model_type="gpt2-xl",
         vocab_size=None,
         block_size=128,
         embd_pdrop=0.1,

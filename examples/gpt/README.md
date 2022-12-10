@@ -145,7 +145,7 @@ lite = LightningLite(
 | 16  	 | 8.4 B         | 14626	     | 94.3 +/- 3.6      | 55.71	     | 39228	             | 30.5 |
 
 In all experiments, we fixed the batch size to 16 and maximized the memory usage by scaling the number of layers, number of attention heads, and embedding size in the transformer block.
-We can observe that scaling from one machine (first row) to two machiens (second row), we can afford increasing the number of parameters by a factor of ~1.5. However, the FLOP/s more than halfs and the
+We can observe that when scaling from one machine (first row) to two machiens (second row), we can afford increasing the number of parameters by a factor of ~1.5. However, the FLOP/s more than halfs and the
 iteration time increases by a large factor, and so does cost. This is due to the extra inter-machine communication overhead.
 
 
