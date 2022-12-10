@@ -16,6 +16,7 @@ We benchmarked different settings for efficient training of the GPT model with h
 - Numbers are average over 100 iterations of training. Listed batch size is per GPU.
 
 In all experiments below, we shard the transformer block evenly across all GPU using the `transformer_auto_wrap_policy` from PyTorch.
+The GPU usage was measured and averaged across all GPUs.
 
 #### FSDP Baseline
 
@@ -97,9 +98,9 @@ lite = LightningLite(
 </details>
 
 
-For this setting, adding backward prefetching did not impact the results. There is no significant difference in memory usage or throughput.
-
 | Batch Size    | Memory (MB)       | GPU Usage %       | TFLOP/s       | Iteration Time (ms)   |
 | ------------- | ----------------- | ----------------- | ------------- | --------------------- |
 | 64            | 11490	            | 97.3 +/- 0.9	    | 36.24	        | 2700.26               |
+
+For this setting, adding backward prefetching did not impact the results. There is no significant difference in memory usage or throughput.
 
