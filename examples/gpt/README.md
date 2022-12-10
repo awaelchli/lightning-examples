@@ -138,11 +138,11 @@ lite = LightningLite(
 - Cloud: [Lightning AI](https://lightning.ai)
 
 
-| # GPUS | # Parameters  | Memory (MB)   | GPU Usage %       | TFLOP/s       | Iteration Time (ms)   | Cost | 
-| ------ | ------------- | --------------| ----------------- | --------------| ----------------------| ---- |
-| 4      | 2.9 B         | 14966         | 91.7 +/- 6.3      | 90.79         | 1908                  | 1.3  |      
-| 8		 | 4.4 B         | 13858	     | 97.1 +/- 3.3	     | 36.68	     | 15717	             | 15.0 |
-| 16  	 | 8.4 B         | 14626	     | 94.3 +/- 3.6      | 55.71	     | 39228	             | 30.5 |
+| # GPUS | # Parameters  | Memory (MB)   | GPU Usage %       | TFLOP/s       | Iteration Time (ms)   | Cost (USD) | 
+| ------ | ------------- | --------------| ----------------- | --------------| ----------------------| ---------- |
+| 4      | 2.9 B         | 14966         | 91.7 +/- 6.3      | 90.79         | 1908                  | 1.3        |      
+| 8		 | 4.4 B         | 13858	     | 97.1 +/- 3.3	     | 36.68	     | 15717	             | 15.0       |
+| 16  	 | 8.4 B         | 14626	     | 94.3 +/- 3.6      | 55.71	     | 39228	             | 30.5       |
 
 In all experiments, we fixed the batch size to 16 and maximized the memory usage by scaling the number of layers, number of attention heads, and embedding size in the transformer block.
 We can observe that when scaling from one machine (first row) to two machiens (second row), we can afford increasing the number of parameters by a factor of ~1.5. However, the FLOP/s more than halfs and the
