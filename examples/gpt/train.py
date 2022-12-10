@@ -2,7 +2,6 @@
 Trains a character-level language model.
 """
 import functools
-import time
 
 import torch
 from gpt.config import GPTConfig, TrainerConfig
@@ -42,7 +41,7 @@ def main():
         num_workers=4,
         max_iters=100,
         block_size=128,
-        batch_size=64,
+        batch_size=32,
         learning_rate=3e-4,
         betas=(0.9, 0.95),
         weight_decay=0.1,  # only applied on matmul weights
@@ -117,7 +116,7 @@ def train(lite, model_config, trainer_config):
             torch.nn.utils.clip_grad_norm_(model.parameters(), trainer_config.grad_norm_clip)
             optimizer.step()
 
-        flops += flop_counter.total()
+        flops += flop_counter.total() * lite.world_size
         iter_dt = flop_counter.time()
         total_iter_dt += iter_dt
         gpu_util.append(gpu_utilization(lite.device))

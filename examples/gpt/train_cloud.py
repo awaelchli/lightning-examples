@@ -12,7 +12,7 @@ from train import train
 class Work(LightningWork):
     def run(self):
         model_config = GPTConfig(
-            model_type="gpt2-xl",
+            model_type="gpt2-xxl",
             vocab_size=None,
             block_size=128,
             embd_pdrop=0.1,
@@ -21,9 +21,9 @@ class Work(LightningWork):
         )
         trainer_config = TrainerConfig(
             num_workers=4,
-            max_iters=100,
+            max_iters=30,
             block_size=128,
-            batch_size=64,
+            batch_size=16,
             learning_rate=3e-4,
             betas=(0.9, 0.95),
             weight_decay=0.1,
