@@ -28,7 +28,9 @@ class GPTConfig:
                 "gpt2": dict(n_layer=12, n_head=12, n_embd=768),  # 124M params
                 "gpt2-medium": dict(n_layer=24, n_head=16, n_embd=1024),  # 350M params
                 "gpt2-large": dict(n_layer=36, n_head=20, n_embd=1280),  # 774M params
-                "gpt2-xl": dict(n_layer=48, n_head=25, n_embd=1600),  # 1558M params
+                "gpt2-xl": dict(n_layer=48, n_head=25, n_embd=1600),  # 1475M params
+                "gpt2-xxl": dict(n_layer=96, n_head=25, n_embd=1600),  # 2951M params
+                "gpt2-xxxl": dict(n_layer=128, n_head=32, n_embd=2000),  # ?
             }[self.model_type]
             self.n_layer = values["n_layer"]
             self.n_head = values["n_head"]
