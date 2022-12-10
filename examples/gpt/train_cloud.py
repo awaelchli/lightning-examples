@@ -34,7 +34,7 @@ class Work(LightningWork):
             devices=-1,
             precision=16,
             strategy="fsdp-gpt",
-            num_nodes=2,  # TODO: Let MultiNode component set this value automatically
+            num_nodes=1,  # TODO: Let MultiNode component set this value automatically
         )
         train(lite, model_config, trainer_config)
 
@@ -42,7 +42,7 @@ class Work(LightningWork):
 app = LightningApp(
     LiteMultiNode(
         Work,
-        num_nodes=2,
+        num_nodes=1,
         cloud_compute=CloudCompute(name="gpu-fast-multi"),
     )
 )
