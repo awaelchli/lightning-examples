@@ -12,7 +12,7 @@ The hyperparameters in these experiments are not optimized for best convergence.
 - Model Size: ~1.4 B parameters
 - Mixed Precision (AMP)
 - Python code: [train.py](train.py)
-- Numbers are average over 100 iterations of training. Listed batch size is per GPU.
+- Numbers are averages over 100 iterations of training. Listed batch size is per GPU.
 
 In all experiments below, we shard the transformer block evenly across all GPU using the `transformer_auto_wrap_policy` from PyTorch.
 The GPU usage was measured and averaged across all GPUs.
@@ -113,7 +113,7 @@ For this setting, adding backward prefetching did not impact the results. There 
 - Model Size: ~3 B parameters
 - Mixed Precision (AMP)
 - Python code: [train.py](train.py)
-- Numbers are average over 100 iterations of training. Listed batch size is per GPU.
+- Numbers are averages over 100 iterations of training. Listed batch size is per GPU.
 
 
 | Batch Size    | Memory (MB)       | GPU Usage %       | TFLOP/s       | Iteration Time (ms)   |
@@ -128,4 +128,13 @@ For this setting, adding backward prefetching did not impact the results. There 
 
 ## Multi-node
 
-Coming soon.
+- Machine: 4x v100 @ 16 GB (gpu-fast-multi, Lightning AI)
+- Mixed Precision (AMP)
+- Python code: [train.py](train_cloud.py)
+- Numbers are averages over 30 iterations of training.
+
+
+| # Parameters  | Batch Size    | Memory (MB)       | GPU Usage %       | TFLOP/s       | Iteration Time (ms)   |
+| ------------- | --------------| ----------------- | ------------------| --------------| ----------------------|
+| 2.9 B	        | 32	        | 11004	            | 99.0 +/- 0.4	    | 7.67	        | 12772                 |  Cost: 0.41 + 0.39
+| 4.4 B	          8              13120                                                                                    Cost: 0.41 + 0.39

@@ -116,7 +116,7 @@ def train(lite, model_config, trainer_config):
             torch.nn.utils.clip_grad_norm_(model.parameters(), trainer_config.grad_norm_clip)
             optimizer.step()
 
-        flops += flop_counter.total()
+        flops += flop_counter.total() * lite.world_size
         iter_dt = flop_counter.time()
         total_iter_dt += iter_dt
         gpu_util.append(gpu_utilization(lite.device))
