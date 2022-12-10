@@ -3,7 +3,7 @@
 We benchmarked different settings for efficient training of a GPT model with high parameter counts using the Fully Sharded Data Parallel strategy (FDSP).
 The model architecture is based on OpenAI's GPT-2. The code was modified from [Andrej Karpathy's minGPT repository](https://github.com/karpathy/minGPT) and accelerated using
 Lightning Lite for distributed training.
-The hyperparameters in these experiments are not optimized for best convergence. We are only intersted in benchmarking how to scale the model to use the available hardwere as efficiently as possible.
+The hyperparameters in these experiments are not optimized for best convergence. We are only intersted in benchmarking how to scale the model to use the available hardware as efficiently as possible.
 
 ## 1.4B Model in a Single Machine
 
