@@ -12,7 +12,7 @@ from train import train
 class Work(LightningWork):
     def run(self):
         model_config = GPTConfig(
-            model_type="gpt2-4xl",
+            model_type="gpt2-xxl",
             vocab_size=None,
             block_size=128,
             embd_pdrop=0.1,
@@ -34,7 +34,7 @@ class Work(LightningWork):
             devices=-1,
             precision=16,
             strategy="fsdp-gpt",
-            num_nodes=4,  # TODO: Let MultiNode component set this value automatically
+            num_nodes=2,  # TODO: Let MultiNode component set this value automatically
         )
         train(lite, model_config, trainer_config)
 
@@ -42,7 +42,7 @@ class Work(LightningWork):
 app = LightningApp(
     LiteMultiNode(
         Work,
-        num_nodes=4,
+        num_nodes=2,
         cloud_compute=CloudCompute(name="gpu-fast-multi"),
     )
 )
