@@ -25,12 +25,13 @@ STRATEGY_REGISTRY.register(
     auto_wrap_policy=auto_wrap_policy,
     activation_checkpointing=[Block],
     backward_prefetch=BackwardPrefetch.BACKWARD_PRE,
+    # cpu_offload=True,
 )
 
 
 def main():
     model_config = GPTConfig(
-        model_type="gpt2-xl",
+        model_type="gpt2",
         vocab_size=None,
         block_size=128,
         embd_pdrop=0.1,
@@ -41,7 +42,7 @@ def main():
         num_workers=4,
         max_iters=100,
         block_size=128,
-        batch_size=32,
+        batch_size=2,
         learning_rate=3e-4,
         betas=(0.9, 0.95),
         weight_decay=0.1,  # only applied on matmul weights
@@ -52,7 +53,7 @@ def main():
     lite = LightningLite(
         accelerator="cuda",
         devices=-1,
-        precision=16,
+        precision=32,
         strategy="fsdp-gpt",
     )
     lite.launch()
