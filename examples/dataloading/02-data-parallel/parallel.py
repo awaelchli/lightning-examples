@@ -114,6 +114,7 @@ def main():
     print("\n")
 
     print("DDP-friendly + Multiprocessing-friendly Iterable Dataset; num_workers: 2, batch_size: 4")
+    # No duplicated data
     mp.start_processes(fixed_data_parallel_with_iterable_dataset, nprocs=NUM_PROCESSES, start_method="fork")
 
 

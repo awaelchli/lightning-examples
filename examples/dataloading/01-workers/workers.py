@@ -93,6 +93,7 @@ def main():
     print("\n")
     
     print("Multiprocessing-friendly Iterable Dataset; num_workers: 2, batch_size: 4")
+    # No duplicated data
     dataloader_iterable_dataset = DataLoader(MultiprocessingIterableDataset(), batch_size=4, num_workers=2)
     print(list(dataloader_iterable_dataset))
         
