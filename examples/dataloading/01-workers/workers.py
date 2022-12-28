@@ -80,12 +80,13 @@ def main():
     print("\n")
 
     print("Map Dataset; num_workers: 2, batch_size: 4")
-    dataloader_map_dataset = DataLoader(SimpleMapDataset(), batch_size=4, num_workers=2)
+    dataloader_map_dataset = DataLoader(MultiprocessingMapDataset(), batch_size=4, num_workers=2)
     print(list(dataloader_map_dataset))
     
     print("\n")
 
-    print("Iterable Dataset; num_workers: 2, batch_size: 4")
+    print("Naive Iterable Dataset; num_workers: 2, batch_size: 4")
+    # Observe the duplicated data!
     dataloader_iterable_dataset = DataLoader(SimpleIterableDataset(), batch_size=4, num_workers=2)
     print(list(dataloader_iterable_dataset))
 
